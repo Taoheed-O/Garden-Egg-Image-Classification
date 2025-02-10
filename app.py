@@ -11,7 +11,7 @@ import torch.nn as nn
 @st.cache_resource
 
 
-model_path =  "model.pth"
+model_path =  "C:\Users\USER\My Projects Folder\Garden-Egg-Image-Classification\model.pth"
 # Define the model architecture (must match the saved model)
 class TinyVGG(nn.Module):
     """
