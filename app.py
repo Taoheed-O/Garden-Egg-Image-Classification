@@ -120,7 +120,7 @@ class_names = ["ripe", "rotten", "unripe"]  # Modify for your dataset
 
 # Build Streamlit UI
 st.title("Garden egg Image Classification")
-st.write("Upload any garden egg image for classification")
+st.write("Upload any garden egg image(s) for classification")
 
 # File uploader
 uploaded_files = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"], accept_multiple_files=True)
@@ -129,9 +129,6 @@ uploaded_files = st.file_uploader("Choose an image...", type=["jpg", "png", "jpe
 if uploaded_files:
     images = [Image.open(file).convert("RGB") for file in uploaded_files]  # Convert to RGB
     predictions = predict_images(model, images)  # Get predictions
-
-    class_names = ["Class 0", "Class 1", "Class 2", "Class 3", "Class 4"]  # Replace with actual class names
-
     # Display images and predictions
     cols = st.columns(len(images))  # Arrange images in a row
     for idx, col in enumerate(cols):
