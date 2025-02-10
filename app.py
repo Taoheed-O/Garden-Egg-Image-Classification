@@ -132,5 +132,5 @@ if uploaded_files:
     # Display images and predictions
     cols = st.columns(len(images))  # Arrange images in a row
     for idx, col in enumerate(cols):
-        col.image(images[idx], caption=f"Predicted: {class_names[predictions[idx]]}", use_column_width=True)
+        col.image(images[idx], caption=f"Predicted: {class_names[predictions[idx]]}", use_container_width=True)
 
