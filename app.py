@@ -11,7 +11,7 @@ import torch.nn as nn
 @st.cache_resource
 
 
-
+model_path =  "model.pth"
 # Define the model architecture (must match the saved model)
 class TinyVGG(nn.Module):
     """
@@ -74,7 +74,7 @@ model = TinyVGG(input_shape=3, # number of color channels (3 for RGB)
                   output_shape=3)  # Ensure the number of classes matches
 
 # Load the state dictionary
-model.load_state_dict(torch.load("model.pth", map_location=torch.device("cpu")))
+model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
 
 # Set model to evaluation mode
 model.eval()
