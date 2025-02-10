@@ -92,16 +92,28 @@ def preprocess_image(image):
     return image
 
 
+# Prediction function for multiple images
+def predict_images(model, images):
+    predictions = []
+    for image in images:
+        img_tensor = preprocess_image(image)
+        with torch.no_grad():
+            outputs = model(img_tensor)
+            _, predicted = torch.max(outputs, 1)  # Get class index
+        predictions.append(predicted.item())
+    return predictions
 
-# Define function to make a prediction
-def predict(image, model, class_names):
-    image = preprocess_image(image)
-    with torch.no_grad():
-        outputs = model(image)  # Forward pass
-        probabilities = torch.nn.functional.softmax(outputs[0], dim=0)  # Convert to probabilities
-        top_prob, top_class = torch.max(probabilities, dim=0)  # Get the most probable class
+
+
+# # Define function to make a prediction
+# def predict(image, model, class_names):
+#     image = preprocess_image(image)
+#     with torch.no_grad():
+#         outputs = model(image)  # Forward pass
+#         probabilities = torch.nn.functional.softmax(outputs[0], dim=0)  # Convert to probabilities
+#         top_prob, top_class = torch.max(probabilities, dim=0)  # Get the most probable class
     
-    return class_names[top_class.item()], top_prob.item()  # Return class name and probability
+#     return class_names[top_class.item()], top_prob.item()  # Return class name and probability
 
 # Define class names (adjust based on your model)
 class_names = ["ripe", "rotten", "unripe"]  # Modify for your dataset
@@ -111,14 +123,17 @@ st.title("Garden egg Image Classification")
 st.write("Upload any garden egg image for classification")
 
 # File uploader
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
+uploaded_files = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"], accept_multiple_files=True)
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded Image", use_column_width=True)
 
-    # Predict button
-    if st.button("Classify Image"):
-        label, confidence = predict(image, model, class_names)
-        st.success(f"Prediction: **{label}** with confidence **{confidence:.2f}**")
+if uploaded_files:
+    images = [Image.open(file).convert("RGB") for file in uploaded_files]  # Convert to RGB
+    predictions = predict_images(model, images)  # Get predictions
+
+    class_names = ["Class 0", "Class 1", "Class 2", "Class 3", "Class 4"]  # Replace with actual class names
+
+    # Display images and predictions
+    cols = st.columns(len(images))  # Arrange images in a row
+    for idx, col in enumerate(cols):
+        col.image(images[idx], caption=f"Predicted: {class_names[predictions[idx]]}", use_column_width=True)
 
