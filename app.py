@@ -6,12 +6,11 @@ from PIL import Image
 import torch.nn as nn
 
 
-
+model_path =  "model.pth"
 # Load the trained PyTorch model
 @st.cache_resource
 
 
-model_path =  "C:\\Users\\USER\\My Projects Folder\\Garden-Egg-Image-Classification\\model.pth"
 # Define the model architecture (must match the saved model)
 class TinyVGG(nn.Module):
     """
