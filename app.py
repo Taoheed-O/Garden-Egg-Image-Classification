@@ -144,6 +144,10 @@ st.write("Upload images or use your webcam to get predictions.")
 
 # Upload multiple images
 uploaded_files = st.file_uploader("Choose images...", type=["jpg", "png", "jpeg"], accept_multiple_files=True)
+# Webcam Feature
+st.write("---")
+st.subheader("📷 Capture Image from Webcam")
+captured_image = st.camera_input("Take a picture")
 
 # # Webcam image capture
 # captured_image = st.camera_input("Take a picture")
@@ -195,11 +199,7 @@ if uploaded_files:
         st.image(heatmap, caption="Grad-CAM Heatmap", use_container_width=True)
 
 
-# Webcam Feature
-st.write("---")
-st.subheader("📷 Capture Image from Webcam")
-captured_image = st.camera_input("Take a picture")
-
+# webcam feature
 if captured_image:
     webcam_image = Image.open(captured_image).convert("RGB")  # Convert to RGB
     # Display webcam image and prediction
