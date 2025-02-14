@@ -132,7 +132,7 @@ def generate_gradcam(model, image, target_layer):
 
 
 # Select the target layer for Grad-CAM
-target_layer = model.model.layer4[1].conv2
+target_layer = model.conv_block_2[-3]
 
 
 # Streamlit UI
