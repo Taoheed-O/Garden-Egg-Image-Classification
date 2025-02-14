@@ -93,44 +93,44 @@ def preprocess_image(image):
 
 
 # Prediction function for multiple images
-def predict_images(model, images):
-    predictions = []
-    for image in images:
-        img_tensor = preprocess_image(image)
-        with torch.no_grad():
-            outputs = model(img_tensor)
-            _, predicted = torch.max(outputs, 1)  # Get class index
-        predictions.append(predicted.item())
-    return predictions
+# Prediction function
+def predict_image(model, image):
+    img_tensor = preprocess_image(image)
+    with torch.no_grad():
+        outputs = model(img_tensor)
+        _, predicted = torch.max(outputs, 1)  # Get class index
+    return predicted.item()
+
+# Streamlit UI
+st.title("Garden Egg Image Classification")
+st.write("Upload images or use your webcam to get predictions.")
 
 
+# Upload multiple images
+uploaded_files = st.file_uploader("Choose images...", type=["jpg", "png", "jpeg"], accept_multiple_files=True)
 
-# # Define function to make a prediction
-# def predict(image, model, class_names):
-#     image = preprocess_image(image)
-#     with torch.no_grad():
-#         outputs = model(image)  # Forward pass
-#         probabilities = torch.nn.functional.softmax(outputs[0], dim=0)  # Convert to probabilities
-#         top_prob, top_class = torch.max(probabilities, dim=0)  # Get the most probable class
-    
-#     return class_names[top_class.item()], top_prob.item()  # Return class name and probability
+# Webcam image capture
+captured_image = st.camera_input("Take a picture")
 
-# Define class names (adjust based on your model)
-class_names = ["ripe", "rotten", "unripe"]  # Modify for your dataset
+# Class names (replace with actual labels)
+class_names = ["ripe", "rotten", "unripe"]  
 
-# Build Streamlit UI
-st.title("Garden egg Image Classification")
-st.write("Upload any garden egg image(s) for classification")
-
-# File uploader
-uploaded_files = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"], accept_multiple_files=True)
-
-
+# Process uploaded images
 if uploaded_files:
     images = [Image.open(file).convert("RGB") for file in uploaded_files]  # Convert to RGB
-    predictions = predict_images(model, images)  # Get predictions
-    # Display images and predictions
+    predictions = [predict_image(model, img) for img in images]  # Predict each image
+
+    # Display images with predictions
+    st.subheader("Uploaded Images Predictions")
     cols = st.columns(len(images))  # Arrange images in a row
     for idx, col in enumerate(cols):
         col.image(images[idx], caption=f"Predicted: {class_names[predictions[idx]]}", use_container_width=True)
 
+# Process webcam image
+if captured_image:
+    webcam_image = Image.open(captured_image).convert("RGB")  # Convert to RGB
+    prediction = predict_image(model, webcam_image)  # Predict
+
+    # Display webcam image and prediction
+    st.subheader("Webcam Image Prediction")
+    st.image(webcam_image, caption=f"Predicted: {class_names[prediction]}", use_container_width=True)
