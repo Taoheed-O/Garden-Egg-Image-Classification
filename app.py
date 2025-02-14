@@ -145,8 +145,8 @@ st.write("Upload images or use your webcam to get predictions.")
 # Upload multiple images
 uploaded_files = st.file_uploader("Choose images...", type=["jpg", "png", "jpeg"], accept_multiple_files=True)
 
-# Webcam image capture
-captured_image = st.camera_input("Take a picture")
+# # Webcam image capture
+# captured_image = st.camera_input("Take a picture")
 
 # Class names (replace with actual labels)
 class_names = ["ripe", "rotten", "unripe"]  
@@ -180,10 +180,11 @@ class_names = ["ripe", "rotten", "unripe"]
 #     st.image(heatmap, caption="Grad-CAM Heatmap", use_column_width=True)
 
 
+# image upload feature
 if uploaded_files:
     for uploaded_file in uploaded_files:
         image = Image.open(uploaded_file)
-        st.image(image, caption=f"Uploaded Image - {uploaded_file.name}", use_column_width=True)
+        st.image(image, caption=f"Uploaded Image - {uploaded_file.name}", use_container_width=True)
 
         # Make prediction
         label, confidence = predict_image(model, image)
@@ -191,7 +192,8 @@ if uploaded_files:
 
         # Generate Grad-CAM heatmap
         heatmap = generate_gradcam(model, image, target_layer)
-        st.image(heatmap, caption="Grad-CAM Heatmap", use_column_width=True)
+        st.image(heatmap, caption="Grad-CAM Heatmap", use_container_width=True)
+
 
 # Webcam Feature
 st.write("---")
@@ -199,14 +201,15 @@ st.subheader("📷 Capture Image from Webcam")
 captured_image = st.camera_input("Take a picture")
 
 if captured_image:
-    webcam_image = Image.open(captured_image)
-    st.image(image, caption="Captured Image", use_column_width=True)
+    webcam_image = Image.open(captured_image).convert("RGB")  # Convert to RGB
+    # Display webcam image and prediction
+    st.subheader("Webcam Image Prediction")
+    st.image(webcam_image, caption=f"Webcam image", use_container_width=True)
 
-    # Make prediction
-    label, confidence = predict_image(model, image)
+    # predict
+    label, confidence = predict_image(model, webcam_image)  # Predict
     st.write(f"**Prediction:** {label}  \n**Confidence:** {confidence:.2f}%")
-
 
     # Generate Grad-CAM heatmap
     heatmap = generate_gradcam(model, webcam_image, target_layer)
-    st.image(heatmap, caption="Grad-CAM Heatmap", use_column_width=True)
+    st.image(heatmap, caption="Grad-CAM Heatmap", use_container_width=True)
