@@ -5,8 +5,6 @@ import torchvision.models as models
 from PIL import Image
 import torch.nn as nn
 import numpy as np
-import cv2
-
 
 model_path =  "model.pth"
 # Load the trained PyTorch model
@@ -127,7 +125,7 @@ def generate_gradcam(model, image, target_layer):
     cam = torch.sum(weights * activations, dim=1).squeeze().detach().numpy()
     
     cam = np.maximum(cam, 0)  # Apply ReLU
-    cam = cv2.resize(cam, (224, 224))  # Resize to image size
+    cam = transforms.Resize(64, 64)
     cam = cam - np.min(cam)
     cam = cam / np.max(cam)  # Normalize to 0-1
     return cam
