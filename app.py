@@ -186,7 +186,7 @@ if uploaded_files:
         st.image(image, caption=f"Uploaded Image - {uploaded_file.name}", use_column_width=True)
 
         # Make prediction
-        label, confidence = predict_image(image)
+        label, confidence = predict_image(model, image)
         st.write(f"**Prediction:** {label}  \n**Confidence:** {confidence:.2f}%")
 
         # Generate Grad-CAM heatmap
@@ -203,7 +203,7 @@ if captured_image:
     st.image(image, caption="Captured Image", use_column_width=True)
 
     # Make prediction
-    label, confidence = predict_image(image)
+    label, confidence = predict_image(model, image)
     st.write(f"**Prediction:** {label}  \n**Confidence:** {confidence:.2f}%")
 
 
