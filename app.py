@@ -99,8 +99,9 @@ def predict_image(model, image):
     img_tensor = preprocess_image(image)
     with torch.no_grad():
         outputs = model(img_tensor)
-        _, predicted = torch.max(outputs, 1)  # Get class index
-    return predicted.item()
+        probabilities = torch.softmax(outputs, dim=1)  # Convert to probabilities
+        confidence, predicted_class = torch.max(probabilities, 1)  # Get top prediction
+    return class_names[predicted_class.item()], confidence.item() * 100  # Convert to %
 
 
 # Grad-CAM Implementation
@@ -151,28 +152,60 @@ captured_image = st.camera_input("Take a picture")
 class_names = ["ripe", "rotten", "unripe"]  
 
 # Process uploaded images
-if uploaded_files:
-    images = [Image.open(file).convert("RGB") for file in uploaded_files]  # Convert to RGB
-    predictions = [predict_image(model, img) for img in images]  # Predict each image
+# if uploaded_files:
+#     images = [Image.open(file).convert("RGB") for file in uploaded_files]  # Convert to RGB
+#     predictions = [predict_image(model, img) for img in images]  # Predict each image
 
-    # Display images with predictions
-    st.subheader("Uploaded Images Predictions")
-    cols = st.columns(len(images))  # Arrange images in a row
-    for idx, col in enumerate(cols):
-        col.image(images[idx], caption=f"Predicted: {class_names[predictions[idx]]}", use_container_width=True)
+#     # Display images with predictions
+#     st.subheader("Uploaded Images Predictions")
+#     cols = st.columns(len(images))  # Arrange images in a row
+#     for idx, col in enumerate(cols):
+#         col.image(images[idx], caption=f"Predicted: {class_names[predictions[idx]]}", use_container_width=True)
+
+#         # Generate Grad-CAM heatmap
+#         heatmap = generate_gradcam(model, images[idx], target_layer)
+#         col.image(heatmap, caption="Grad-CAM Heatmap", use_column_width=True)
+
+# # Process webcam image
+# if captured_image:
+#     webcam_image = Image.open(captured_image).convert("RGB")  # Convert to RGB
+#     prediction = predict_image(model, webcam_image)  # Predict
+
+#     # Display webcam image and prediction
+#     st.subheader("Webcam Image Prediction")
+#     st.image(webcam_image, caption=f"Predicted: {class_names[prediction]}", use_container_width=True)
+
+#     # Generate Grad-CAM heatmap
+#     heatmap = generate_gradcam(model, webcam_image, target_layer)
+#     st.image(heatmap, caption="Grad-CAM Heatmap", use_column_width=True)
+
+
+if uploaded_files:
+    for uploaded_file in uploaded_files:
+        image = Image.open(uploaded_file)
+        st.image(image, caption=f"Uploaded Image - {uploaded_file.name}", use_column_width=True)
+
+        # Make prediction
+        label, confidence = predict_image(image)
+        st.write(f"**Prediction:** {label}  \n**Confidence:** {confidence:.2f}%")
 
         # Generate Grad-CAM heatmap
-        heatmap = generate_gradcam(model, images[idx], target_layer)
-        col.image(heatmap, caption="Grad-CAM Heatmap", use_column_width=True)
+        heatmap = generate_gradcam(model, image, target_layer)
+        st.image(heatmap, caption="Grad-CAM Heatmap", use_column_width=True)
 
-# Process webcam image
+# Webcam Feature
+st.write("---")
+st.subheader("📷 Capture Image from Webcam")
+captured_image = st.camera_input("Take a picture")
+
 if captured_image:
-    webcam_image = Image.open(captured_image).convert("RGB")  # Convert to RGB
-    prediction = predict_image(model, webcam_image)  # Predict
+    webcam_image = Image.open(captured_image)
+    st.image(image, caption="Captured Image", use_column_width=True)
 
-    # Display webcam image and prediction
-    st.subheader("Webcam Image Prediction")
-    st.image(webcam_image, caption=f"Predicted: {class_names[prediction]}", use_container_width=True)
+    # Make prediction
+    label, confidence = predict_image(image)
+    st.write(f"**Prediction:** {label}  \n**Confidence:** {confidence:.2f}%")
+
 
     # Generate Grad-CAM heatmap
     heatmap = generate_gradcam(model, webcam_image, target_layer)
