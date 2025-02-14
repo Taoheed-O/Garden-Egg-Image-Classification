@@ -4,6 +4,8 @@ import torchvision.transforms as transforms
 import torchvision.models as models
 from PIL import Image
 import torch.nn as nn
+import numpy as np
+import cv2
 
 
 model_path =  "model.pth"
@@ -101,6 +103,40 @@ def predict_image(model, image):
         _, predicted = torch.max(outputs, 1)  # Get class index
     return predicted.item()
 
+
+# Grad-CAM Implementation
+def generate_gradcam(model, image, target_layer):
+    model.eval()
+    img_tensor = preprocess_image(image)
+    img_tensor.requires_grad = True
+
+    # Forward pass
+    output = model(img_tensor)
+    pred_class = output.argmax().item()
+
+    # Backward pass
+    model.zero_grad()
+    output[0, pred_class].backward()
+
+    # Get gradients of the target layer
+    gradients = target_layer.weight.grad
+    activations = target_layer.weight.data
+
+    # Compute Grad-CAM
+    weights = torch.mean(gradients, dim=[2, 3], keepdim=True)
+    cam = torch.sum(weights * activations, dim=1).squeeze().detach().numpy()
+    
+    cam = np.maximum(cam, 0)  # Apply ReLU
+    cam = cv2.resize(cam, (224, 224))  # Resize to image size
+    cam = cam - np.min(cam)
+    cam = cam / np.max(cam)  # Normalize to 0-1
+    return cam
+
+
+# Select the target layer for Grad-CAM
+target_layer = model.model.layer4[1].conv2
+
+
 # Streamlit UI
 st.title("Garden Egg Image Classification")
 st.write("Upload images or use your webcam to get predictions.")
@@ -126,6 +162,10 @@ if uploaded_files:
     for idx, col in enumerate(cols):
         col.image(images[idx], caption=f"Predicted: {class_names[predictions[idx]]}", use_container_width=True)
 
+        # Generate Grad-CAM heatmap
+        heatmap = generate_gradcam(model, images[idx], target_layer)
+        col.image(heatmap, caption="Grad-CAM Heatmap", use_column_width=True)
+
 # Process webcam image
 if captured_image:
     webcam_image = Image.open(captured_image).convert("RGB")  # Convert to RGB
@@ -134,3 +174,7 @@ if captured_image:
     # Display webcam image and prediction
     st.subheader("Webcam Image Prediction")
     st.image(webcam_image, caption=f"Predicted: {class_names[prediction]}", use_container_width=True)
+
+    # Generate Grad-CAM heatmap
+    heatmap = generate_gradcam(model, webcam_image, target_layer)
+    st.image(heatmap, caption="Grad-CAM Heatmap", use_column_width=True)
