@@ -8,6 +8,8 @@ import numpy as np
 from skimage.transform import resize
 
 model_path =  "model.pth"
+
+
 # Load the trained PyTorch model
 @st.cache_resource
 
@@ -94,6 +96,7 @@ def preprocess_image(image):
 
 
 # Prediction function for multiple images
+
 # Prediction function
 def predict_image(model, image):
     img_tensor = preprocess_image(image)
